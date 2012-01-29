@@ -18,9 +18,7 @@ createTableTables =->
     console.log 'createTableTables start'
     createTable create_table_tables
 
-
-
 $ ->
     $('#test').click ->
-        alert 'hoge'
+        alert 'hoge fuga'
         createTableTables()

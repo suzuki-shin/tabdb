@@ -30,7 +30,7 @@
 
   $(function() {
     return $('#test').click(function() {
-      alert('hoge');
+      alert('hoge fuga');
       return createTableTables();
     });
   });
