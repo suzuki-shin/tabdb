@@ -1,6 +1,6 @@
 .svn
 *.pyc
 TAGS
-index.yaml
-js/jquery.js
-js/node_modules
+public_html/index.yaml
+public_html/js/jquery.js
+public_html/js/node_modules
