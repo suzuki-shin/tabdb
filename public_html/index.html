@@ -4,8 +4,8 @@
   <head>
     <link type="text/css" rel="stylesheet" href="css/tabdb.css" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<!--     <script type="text/javascript" src="js/dd.js"></script> -->
-<!--     <script type="text/javascript" src="js/file.js"></script> -->
+    <script type="text/javascript" src="js/dd.js"></script>
+    <script type="text/javascript" src="js/file.js"></script>
     <script type="text/javascript" src="js/tabdb.js"></script>
   </head>
 <!--   {% include "header.html" %} -->
@@ -27,31 +27,31 @@
 		<input type="file" id="selectFile"/>
 <!-- 		<input type="file" accept="image/*" id="selectFile"/> -->
 		<script>
-		  var readFile = function(file) {
-			console.log('readFile');
-			console.log(file);
-
-			var reader = new FileReader();
-			console.log(reader);
-			reader.readAsText(file);
-
-			reader.onload = function(event) {
-	          console.log('readeronload');
-			  alert('onload');
-			  var textData = event.target.result;
-			  alert(textData);
-			}
-
-			reader.onerror = function() {
-			  alert('error');
-			}
-		  };
-
-		  document.getElementById('selectFile').onchange = function(event) {
-			var file = event.target.files[0];
-			alert(file.name + ' is selected.');
-			readFile(file);
-		  };
+//		  var readFile = function(file) {
+//			console.log('readFile');
+//			console.log(file);
+//
+//			var reader = new FileReader();
+//			console.log(reader);
+//			reader.readAsText(file);
+//
+//			reader.onload = function(event) {
+//	          console.log('readeronload');
+//			  alert('onload');
+//			  var textData = event.target.result;
+//			  alert(textData);
+//			}
+//
+//			reader.onerror = function() {
+//			  alert('error');
+//			}
+//		  };
+//
+//		  document.getElementById('selectFile').onchange = function(event) {
+//			var file = event.target.files[0];
+//			alert(file.name + ' is selected.');
+//			readFile(file);
+//		  };
 		</script>
 	  </div>
 	</div>
