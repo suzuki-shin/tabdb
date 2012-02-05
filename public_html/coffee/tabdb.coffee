@@ -1,4 +1,7 @@
-create_table_tables = 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)'
+create_tabdb_tables = 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)'
+insert_tabdb_tables = 'INSERT INTO tabdb_tables (name) VALUES (?)'
+select_tabdb_tables = 'select name from tabdb_tables'
+where_name_eq = ' where name = ?'
 
 db = window.openDatabase "tabdb","","TABDB", 1048576
 
@@ -9,16 +12,59 @@ failureLog = (mes) ->
     console.log '[failure]'
     console.log mes
 
-createTable = (sql, params = []) ->
-    console.log 'createTable start'
+execSql = (sql, params = [], success_callback = successLog, failure_callback = failureLog) ->
+    console.log 'execSql start'
+    console.log params
     db.transaction (tx) ->
-         tx.executeSql sql, params, successLog, failureLog
+         tx.executeSql sql, params, success_callback, failure_callback
 
-createTableTables =->
-    console.log 'createTableTables start'
-    createTable create_table_tables
+createTabdbTables =->
+    console.log 'createTabdbTables start'
+    execSql create_tabdb_tables
+
+# insertTabdbTables = (name) ->
+#     console.log 'insertTabdbTables start'
+#     execSql insert_tabdb_tables, [name]
+
+insertTabdbTablesIfNotExists = (name) ->
+    console.log 'insertTabdbTablesIfNotExists start'
+    execSql select_tabdb_tables + where_name_eq,
+            [name],
+            (tx, res) ->
+                 console.log res.rows
+                 if res.rows.length > 0
+                     console.log 'already exist table'
+                 else
+                     _insertTabdbTables name
+
+    _insertTabdbTables = (name) ->
+	    console.log 'insertTabdbTables start'
+	    execSql insert_tabdb_tables, [name]
+
+
+
+# file api
+selectFile = (ev) ->
+    file = ev.target.files[0]
+    alert file.name + ' is selected!'
+#     insertTabdbTables 'jkjkj'
+#     insertTabdbTables file.name
+    insertTabdbTablesIfNotExists file.name
+
+    reader = new FileReader()
+    reader.readAsText(file)
+
+    reader.onload = (ev) ->
+        console.log 'readeronload'
+        textData = reader.result
+        alert textData
+
+    reader.onerror = (ev) ->
+        alert 'error'
 
 $ ->
+    $(document).on 'change', '#selectFile', selectFile
+
     $('#test').click ->
         alert 'hoge fuga'
-        createTableTables()
+        createTabdbTables()
