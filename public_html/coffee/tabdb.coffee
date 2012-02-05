@@ -68,6 +68,6 @@ selectFile = (ev) ->
 $ ->
     $(document).on 'change', '#selectFile', selectFile
 
-    $('#test').click ->
-        alert 'hoge fuga'
-        createTabdbTables()
+#     $('#test').click ->
+#         alert 'hoge fuga'
+#         createTabdbTables()

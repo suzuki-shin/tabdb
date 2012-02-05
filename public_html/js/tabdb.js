@@ -78,11 +78,7 @@
   };
 
   $(function() {
-    $(document).on('change', '#selectFile', selectFile);
-    return $('#test').click(function() {
-      alert('hoge fuga');
-      return createTabdbTables();
-    });
+    return $(document).on('change', '#selectFile', selectFile);
   });
 
 }).call(this);
