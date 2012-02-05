@@ -40,12 +40,14 @@
   saveIfNotExists = function(name, data) {
     var _createDataTable, _insertTabdbTables;
     console.log('saveIfNotExists start');
+    console.log(data);
     execSql(select_tabdb_tables + where_name_eq, [name], function(tx, res) {
       console.log(res.rows);
       if (res.rows.length > 0) {
         return console.log('already exist table');
       } else {
         _insertTabdbTables(name);
+        console.log(data);
         return _createDataTable(name, data);
       }
     });
@@ -58,7 +60,8 @@
       console.log('_createDataTable');
       lines = data.split("\n");
       console.log(lines);
-      return execSql(createTableSql(name, lines[0].split(',')), [], insertTableSql(name, lines));
+      execSql(createTableSql(name, lines[0].split(',')), console.log(lines));
+      return execSql(insertTableSql(name, lines));
     };
   };
 
@@ -129,7 +132,7 @@
     $(document).on('change', '#selectFile', selectFile);
     return $('#test').click(function() {
       alert('hoge fuga');
-      return insertTableSql('bbb', ["a,b,c", "AAA,BBB,1", "XXX,YYY,2"]);
+      return saveIfNotExists('ABC', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n");
     });
   });
 

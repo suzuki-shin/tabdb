@@ -24,6 +24,7 @@ createTabdbTables =->
 
 saveIfNotExists = (name, data) ->
     console.log 'saveIfNotExists start'
+    console.log data
     execSql select_tabdb_tables + where_name_eq,
             [name],
             (tx, res) ->
@@ -32,6 +33,7 @@ saveIfNotExists = (name, data) ->
                      console.log 'already exist table'
                  else
                      _insertTabdbTables name
+                     console.log data
                      _createDataTable name, data
 
     _insertTabdbTables = (name) ->
@@ -44,8 +46,8 @@ saveIfNotExists = (name, data) ->
         lines = data.split "\n"
         console.log lines
         execSql createTableSql(name, lines[0].split ','),
-                [],
-                insertTableSql name, lines
+        console.log lines
+        execSql insertTableSql name, lines
 
 #     _insertDataTable = (name, data = []) ->
 #         console.log '_insertDataTable start'
@@ -93,6 +95,6 @@ $ ->
 
     $('#test').click ->
         alert 'hoge fuga'
-        insertTableSql 'bbb', ["a,b,c","AAA,BBB,1","XXX,YYY,2"]
-#         saveIfNotExists 'bbb', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n"
+#         insertTableSql 'bbb', ["a,b,c","AAA,BBB,1","XXX,YYY,2"]
+        saveIfNotExists 'ABC', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n"
 #         console.log createTableSql('aaa', ['id','a','b'])
