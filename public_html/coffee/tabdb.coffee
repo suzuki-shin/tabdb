@@ -26,8 +26,8 @@ createTabdbTables =->
 #     console.log 'insertTabdbTables start'
 #     execSql insert_tabdb_tables, [name]
 
-insertTabdbTablesIfNotExists = (name) ->
-    console.log 'insertTabdbTablesIfNotExists start'
+saveIfNotExists = (name, data) ->
+    console.log 'saveIfNotExists start'
     execSql select_tabdb_tables + where_name_eq,
             [name],
             (tx, res) ->
@@ -36,12 +36,15 @@ insertTabdbTablesIfNotExists = (name) ->
                      console.log 'already exist table'
                  else
                      _insertTabdbTables name
+                     _createDataTable data
 
     _insertTabdbTables = (name) ->
 	    console.log 'insertTabdbTables start'
 	    execSql insert_tabdb_tables, [name]
 
-
+    _createDataTable = (data) ->
+        console.log '_createDataTable'
+        console.log data
 
 # file api
 selectFile = (ev) ->
@@ -49,7 +52,6 @@ selectFile = (ev) ->
     alert file.name + ' is selected!'
 #     insertTabdbTables 'jkjkj'
 #     insertTabdbTables file.name
-    insertTabdbTablesIfNotExists file.name
 
     reader = new FileReader()
     reader.readAsText(file)
@@ -58,6 +60,7 @@ selectFile = (ev) ->
         console.log 'readeronload'
         textData = reader.result
         alert textData
+        saveIfNotExists file.name, textData
 
     reader.onerror = (ev) ->
         alert 'error'

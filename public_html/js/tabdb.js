@@ -1,5 +1,5 @@
 (function() {
-  var createTabdbTables, create_tabdb_tables, db, execSql, failureLog, insertTabdbTablesIfNotExists, insert_tabdb_tables, selectFile, select_tabdb_tables, successLog, where_name_eq;
+  var createTabdbTables, create_tabdb_tables, db, execSql, failureLog, insert_tabdb_tables, saveIfNotExists, selectFile, select_tabdb_tables, successLog, where_name_eq;
 
   create_tabdb_tables = 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)';
 
@@ -37,20 +37,25 @@
     return execSql(create_tabdb_tables);
   };
 
-  insertTabdbTablesIfNotExists = function(name) {
-    var _insertTabdbTables;
-    console.log('insertTabdbTablesIfNotExists start');
+  saveIfNotExists = function(name, data) {
+    var _createDataTable, _insertTabdbTables;
+    console.log('saveIfNotExists start');
     execSql(select_tabdb_tables + where_name_eq, [name], function(tx, res) {
       console.log(res.rows);
       if (res.rows.length > 0) {
         return console.log('already exist table');
       } else {
-        return _insertTabdbTables(name);
+        _insertTabdbTables(name);
+        return _createDataTable(data);
       }
     });
-    return _insertTabdbTables = function(name) {
+    _insertTabdbTables = function(name) {
       console.log('insertTabdbTables start');
       return execSql(insert_tabdb_tables, [name]);
+    };
+    return _createDataTable = function(data) {
+      console.log('_createDataTable');
+      return console.log(data);
     };
   };
 
@@ -58,14 +63,14 @@
     var file, reader;
     file = ev.target.files[0];
     alert(file.name + ' is selected!');
-    insertTabdbTablesIfNotExists(file.name);
     reader = new FileReader();
     reader.readAsText(file);
     reader.onload = function(ev) {
       var textData;
       console.log('readeronload');
       textData = reader.result;
-      return alert(textData);
+      alert(textData);
+      return saveIfNotExists(file.name, textData);
     };
     return reader.onerror = function(ev) {
       return alert('error');
