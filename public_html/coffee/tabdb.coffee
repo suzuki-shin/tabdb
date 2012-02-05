@@ -32,18 +32,36 @@ saveIfNotExists = (name, data) ->
                      console.log 'already exist table'
                  else
                      _insertTabdbTables name
-                     _createDataTable data
+                     _createDataTable name, data
 
     _insertTabdbTables = (name) ->
-        console.log 'insertTabdbTables start'
+        console.log '_insertTabdbTables start'
         execSql insert_tabdb_tables, [name]
 
-    _createDataTable = (data) ->
+    _createDataTable = (name, data) ->
         console.log '_createDataTable'
 #         console.log (line.split ',' for line in data.split "\n")
         lines = data.split "\n"
         console.log lines
+        execSql createTableSql(name, lines[0].split ','),
+                [],
+                insertTableSql name, lines
 
+#     _insertDataTable = (name, data = []) ->
+#         console.log '_insertDataTable start'
+#         insertTableSql(name, data)
+
+
+createTableSql = (name, cols = []) ->
+    "CREATE TABLE IF NOT EXISTS #{name} (" + (" #{c} TEXT " for c in cols) + ")"
+
+insertTableSql = (name, data = []) ->
+    console.log 'insertTableSql'
+    console.log name
+    console.log data
+    for d in data.splice 1
+        quoted = ("'" + d_ + "'" for d_ in d.split ',')
+        execSql "insert into #{name} (#{data[0]}) values (#{quoted})"
 
 # file api
 selectFile = (ev) ->
@@ -64,9 +82,17 @@ selectFile = (ev) ->
     reader.onerror = (ev) ->
         alert 'error'
 
+
+test_insertDataTable = (name, data = []) ->
+    console.log '_insertDataTable start'
+    execSql
+
+
 $ ->
     $(document).on 'change', '#selectFile', selectFile
 
-#     $('#test').click ->
-#         alert 'hoge fuga'
-#         createTabdbTables()
+    $('#test').click ->
+        alert 'hoge fuga'
+        insertTableSql 'bbb', ["a,b,c","AAA,BBB,1","XXX,YYY,2"]
+#         saveIfNotExists 'bbb', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n"
+#         console.log createTableSql('aaa', ['id','a','b'])
