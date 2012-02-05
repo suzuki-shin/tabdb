@@ -54,8 +54,10 @@
       return execSql(insert_tabdb_tables, [name]);
     };
     return _createDataTable = function(data) {
+      var lines;
       console.log('_createDataTable');
-      return console.log(data);
+      lines = data.split("\n");
+      return console.log(lines);
     };
   };
 

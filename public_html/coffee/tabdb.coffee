@@ -22,10 +22,6 @@ createTabdbTables =->
     console.log 'createTabdbTables start'
     execSql create_tabdb_tables
 
-# insertTabdbTables = (name) ->
-#     console.log 'insertTabdbTables start'
-#     execSql insert_tabdb_tables, [name]
-
 saveIfNotExists = (name, data) ->
     console.log 'saveIfNotExists start'
     execSql select_tabdb_tables + where_name_eq,
@@ -39,12 +35,15 @@ saveIfNotExists = (name, data) ->
                      _createDataTable data
 
     _insertTabdbTables = (name) ->
-	    console.log 'insertTabdbTables start'
-	    execSql insert_tabdb_tables, [name]
+        console.log 'insertTabdbTables start'
+        execSql insert_tabdb_tables, [name]
 
     _createDataTable = (data) ->
         console.log '_createDataTable'
-        console.log data
+#         console.log (line.split ',' for line in data.split "\n")
+        lines = data.split "\n"
+        console.log lines
+
 
 # file api
 selectFile = (ev) ->
