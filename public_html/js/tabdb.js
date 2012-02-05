@@ -26,6 +26,7 @@
     if (success_callback == null) success_callback = successLog;
     if (failure_callback == null) failure_callback = failureLog;
     console.log('execSql start');
+    console.log(sql);
     console.log(params);
     return db.transaction(function(tx) {
       return tx.executeSql(sql, params, success_callback, failure_callback);
@@ -115,6 +116,7 @@
       console.log('readeronload');
       textData = reader.result;
       alert(textData);
+      console.log(textData.split("\n"));
       return saveIfNotExists(file.name, textData);
     };
     return reader.onerror = function(ev) {

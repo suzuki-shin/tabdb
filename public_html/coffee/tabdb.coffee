@@ -14,9 +14,10 @@ failureLog = (mes) ->
 
 execSql = (sql, params = [], success_callback = successLog, failure_callback = failureLog) ->
     console.log 'execSql start'
+    console.log sql
     console.log params
     db.transaction (tx) ->
-         tx.executeSql sql, params, success_callback, failure_callback
+        tx.executeSql sql, params, success_callback, failure_callback
 
 createTabdbTables =->
     console.log 'createTabdbTables start'
@@ -79,6 +80,7 @@ selectFile = (ev) ->
         console.log 'readeronload'
         textData = reader.result
         alert textData
+        console.log textData.split("\n")
         saveIfNotExists file.name, textData
 
     reader.onerror = (ev) ->
