@@ -1,5 +1,5 @@
 (function() {
-  var createTabdbTables, createTableSql, create_tabdb_tables, db, execSql, failureLog, insertTableSql, insert_tabdb_tables, saveIfNotExists, selectFile, select_tabdb_tables, successLog, test_insertDataTable, where_name_eq;
+  var createTabdbTables, createTableSql, create_tabdb_tables, db, execSelectAndLog, execSql, failureLog, insertTableSql, insert_tabdb_tables, saveIfNotExists, selectFile, select_tabdb_tables, successLog, where_name_eq;
 
   create_tabdb_tables = 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)';
 
@@ -124,17 +124,28 @@
     };
   };
 
-  test_insertDataTable = function(name, data) {
-    if (data == null) data = [];
-    console.log('_insertDataTable start');
-    return execSql;
+  execSelectAndLog = function(table_name) {
+    var _log;
+    _log = function(tx, res) {
+      var i, len;
+      len = res.rows.length;
+      return console.log((function() {
+        var _results;
+        _results = [];
+        for (i = 0; 0 <= len ? i < len : i > len; 0 <= len ? i++ : i--) {
+          _results.push(res.rows.item(i));
+        }
+        return _results;
+      })());
+    };
+    return execSql("select * from " + table_name, [], _log);
   };
 
   $(function() {
     $(document).on('change', '#selectFile', selectFile);
     return $('#test').click(function() {
       alert('hoge fuga');
-      return saveIfNotExists('ABC', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n");
+      return execSelectAndLog('tabdb_tables');
     });
   });
 

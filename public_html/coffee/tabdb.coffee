@@ -87,9 +87,13 @@ selectFile = (ev) ->
         alert 'error'
 
 
-test_insertDataTable = (name, data = []) ->
-    console.log '_insertDataTable start'
-    execSql
+execSelectAndLog = (table_name) ->
+    _log = (tx, res) ->
+        len = res.rows.length
+        console.log (res.rows.item(i) for i in [0...len])
+#         console.log (res.rows.item(i).name for i in [0...len])
+
+    execSql "select * from #{table_name}", [], _log
 
 
 $ ->
@@ -97,6 +101,7 @@ $ ->
 
     $('#test').click ->
         alert 'hoge fuga'
-#         insertTableSql 'bbb', ["a,b,c","AAA,BBB,1","XXX,YYY,2"]
-        saveIfNotExists 'ABC', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n"
+        execSelectAndLog 'tabdb_tables'
+#         insertTableSql 'aaa', ["id,a,b","AAA,BBB,1","XXX,YYY,2"]
+#         saveIfNotExists 'ABC', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n"
 #         console.log createTableSql('aaa', ['id','a','b'])
