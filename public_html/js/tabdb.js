@@ -124,19 +124,24 @@
     };
   };
 
-  execSelectAndLog = function(table_name) {
+  execSelectAndLog = function(table_name, cols) {
     var _log;
+    if (cols == null) cols = [];
     _log = function(tx, res) {
-      var i, len;
+      var i, j, len, _results;
       len = res.rows.length;
-      return console.log((function() {
-        var _results;
-        _results = [];
-        for (i = 0; 0 <= len ? i < len : i > len; 0 <= len ? i++ : i--) {
-          _results.push(res.rows.item(i));
-        }
-        return _results;
-      })());
+      _results = [];
+      for (i = 0; 0 <= len ? i < len : i > len; 0 <= len ? i++ : i--) {
+        _results.push(console.log((function() {
+          var _ref, _results2;
+          _results2 = [];
+          for (j = 0, _ref = cols.length; 0 <= _ref ? j < _ref : j > _ref; 0 <= _ref ? j++ : j--) {
+            _results2.push(cols[j] + ': ' + res.rows.item(i)[cols[j]]);
+          }
+          return _results2;
+        })()));
+      }
+      return _results;
     };
     return execSql("select * from " + table_name, [], _log);
   };
@@ -145,7 +150,8 @@
     $(document).on('change', '#selectFile', selectFile);
     return $('#test').click(function() {
       alert('hoge fuga');
-      return execSelectAndLog('tabdb_tables');
+      execSelectAndLog('tabdb_tables', ['name']);
+      return execSelectAndLog('bbb', ['a', 'b', 'c']);
     });
   });
 

@@ -87,13 +87,13 @@ selectFile = (ev) ->
         alert 'error'
 
 
-execSelectAndLog = (table_name) ->
-    _log = (tx, res) ->
-        len = res.rows.length
-        console.log (res.rows.item(i) for i in [0...len])
-#         console.log (res.rows.item(i).name for i in [0...len])
+execSelectAndLog = (table_name, cols = []) ->
+   _log = (tx, res) ->
+       len = res.rows.length
+       for i in [0...len]
+           console.log (cols[j] + ': ' +  res.rows.item(i)[cols[j]] for j in [0...cols.length])
 
-    execSql "select * from #{table_name}", [], _log
+   execSql "select * from #{table_name}", [], _log
 
 
 $ ->
@@ -101,7 +101,8 @@ $ ->
 
     $('#test').click ->
         alert 'hoge fuga'
-        execSelectAndLog 'tabdb_tables'
+        execSelectAndLog 'tabdb_tables', ['name']
+        execSelectAndLog 'bbb', ['a','b','c']
 #         insertTableSql 'aaa', ["id,a,b","AAA,BBB,1","XXX,YYY,2"]
 #         saveIfNotExists 'ABC', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n"
 #         console.log createTableSql('aaa', ['id','a','b'])
