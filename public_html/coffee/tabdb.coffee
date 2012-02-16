@@ -5,19 +5,24 @@ where_name_eq = ' where name = ?'
 
 db = window.openDatabase "tabdb","","TABDB", 1048576
 
+# execSqlのsuccess_callbackのdefault
 successLog = (mes) ->
     console.log '[success]'
     console.log mes
+
+# execSqlのfailure_callbackのdefault
 failureLog = (mes) ->
     console.log '[failure]'
     console.log mes
 
+# executeSqlのラッパー
 execSql = (sql, params = [], success_callback = successLog, failure_callback = failureLog) ->
     console.log 'execSql start'
     console.log sql
     console.log params
     db.transaction (tx) ->
         tx.executeSql sql, params, success_callback, failure_callback
+
 
 createTabdbTables =->
     console.log 'createTabdbTables start'
