@@ -1,11 +1,5 @@
 (function() {
-  var createTabdbTables, createTableSql, create_tabdb_tables, db, execSelectAndLog, execSql, failureLog, insertTableSql, insert_tabdb_tables, saveIfNotExists, selectFile, select_tabdb_tables, successLog, where_name_eq;
-
-  create_tabdb_tables = 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)';
-
-  insert_tabdb_tables = 'INSERT INTO tabdb_tables (name) VALUES (?)';
-
-  select_tabdb_tables = 'select name from tabdb_tables';
+  var createTabdbTables, createTableSql, db, execSelectAndLog, execSql, failureLog, insertTableSql, saveIfNotExists, selectFile, successLog, where_name_eq;
 
   where_name_eq = ' where name = ?';
 
@@ -35,14 +29,14 @@
 
   createTabdbTables = function() {
     console.log('createTabdbTables start');
-    return execSql(create_tabdb_tables);
+    return execSql('CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)');
   };
 
   saveIfNotExists = function(name, data) {
     var _createDataTable, _insertTabdbTables;
     console.log('saveIfNotExists start');
     console.log(data);
-    execSql(select_tabdb_tables + where_name_eq, [name], function(tx, res) {
+    execSql('SELECT name FROM tabdb_tables' + where_name_eq, [name], function(tx, res) {
       console.log(res.rows);
       if (res.rows.length > 0) {
         return console.log('already exist table');
@@ -54,7 +48,7 @@
     });
     _insertTabdbTables = function(name) {
       console.log('_insertTabdbTables start');
-      return execSql(insert_tabdb_tables, [name]);
+      return execSql('INSERT INTO tabdb_tables (name) VALUES (?)', [name]);
     };
     return _createDataTable = function(name, data) {
       var lines;
@@ -150,8 +144,11 @@
     $(document).on('change', '#selectFile', selectFile);
     return $('#test').click(function() {
       alert('hoge fuga');
+      createTabdbTables();
       execSelectAndLog('tabdb_tables', ['name']);
-      return execSelectAndLog('bbb', ['a', 'b', 'c']);
+      execSelectAndLog('bbb', ['a', 'b', 'c']);
+      console.log(createTableSql('ABC', ['a', 'b', 'c']));
+      return saveIfNotExists('ABC', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n");
     });
   });
 

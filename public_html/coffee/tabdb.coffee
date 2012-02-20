@@ -1,6 +1,3 @@
-create_tabdb_tables = 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)'
-insert_tabdb_tables = 'INSERT INTO tabdb_tables (name) VALUES (?)'
-select_tabdb_tables = 'select name from tabdb_tables'
 where_name_eq = ' where name = ?'
 
 db = window.openDatabase "tabdb","","TABDB", 1048576
@@ -26,12 +23,12 @@ execSql = (sql, params = [], success_callback = successLog, failure_callback = f
 
 createTabdbTables =->
     console.log 'createTabdbTables start'
-    execSql create_tabdb_tables
+    execSql 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)'
 
 saveIfNotExists = (name, data) ->
     console.log 'saveIfNotExists start'
     console.log data
-    execSql select_tabdb_tables + where_name_eq,
+    execSql 'SELECT name FROM tabdb_tables' + where_name_eq,
             [name],
             (tx, res) ->
                  console.log res.rows
@@ -44,7 +41,7 @@ saveIfNotExists = (name, data) ->
 
     _insertTabdbTables = (name) ->
         console.log '_insertTabdbTables start'
-        execSql insert_tabdb_tables, [name]
+        execSql 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]
 
     _createDataTable = (name, data) ->
         console.log '_createDataTable'
@@ -106,8 +103,9 @@ $ ->
 
     $('#test').click ->
         alert 'hoge fuga'
+        createTabdbTables()
         execSelectAndLog 'tabdb_tables', ['name']
         execSelectAndLog 'bbb', ['a','b','c']
 #         insertTableSql 'aaa', ["id,a,b","AAA,BBB,1","XXX,YYY,2"]
-#         saveIfNotExists 'ABC', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n"
-#         console.log createTableSql('aaa', ['id','a','b'])
+        console.log createTableSql('ABC', ['a','b','c'])
+        saveIfNotExists 'ABC', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n"
