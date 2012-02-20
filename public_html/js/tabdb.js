@@ -45,6 +45,10 @@
         console.log(data);
         return _createDataTable(name, data);
       }
+    }, function(tx, res) {
+      createTabdbTables();
+      _insertTabdbTables(name);
+      return _createDataTable(name, data);
     });
     _insertTabdbTables = function(name) {
       console.log('_insertTabdbTables start');
@@ -144,7 +148,6 @@
     $(document).on('change', '#selectFile', selectFile);
     return $('#test').click(function() {
       alert('hoge fuga');
-      createTabdbTables();
       execSelectAndLog('tabdb_tables', ['name']);
       execSelectAndLog('bbb', ['a', 'b', 'c']);
       console.log(createTableSql('ABC', ['a', 'b', 'c']));

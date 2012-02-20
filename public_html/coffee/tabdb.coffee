@@ -38,6 +38,10 @@ saveIfNotExists = (name, data) ->
                      _insertTabdbTables name
                      console.log data
                      _createDataTable name, data
+            (tx, res) ->
+                 createTabdbTables()
+                 _insertTabdbTables name
+                 _createDataTable name, data
 
     _insertTabdbTables = (name) ->
         console.log '_insertTabdbTables start'
@@ -103,7 +107,7 @@ $ ->
 
     $('#test').click ->
         alert 'hoge fuga'
-        createTabdbTables()
+#         createTabdbTables()
         execSelectAndLog 'tabdb_tables', ['name']
         execSelectAndLog 'bbb', ['a','b','c']
 #         insertTableSql 'aaa', ["id,a,b","AAA,BBB,1","XXX,YYY,2"]
