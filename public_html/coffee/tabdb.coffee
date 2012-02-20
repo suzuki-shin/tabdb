@@ -50,6 +50,7 @@ saveIfNotExists = (name, data) ->
     _createDataTable = (name, data) ->
         console.log '_createDataTable'
 #         console.log (line.split ',' for line in data.split "\n")
+        console.log data
         lines = data.split "\n"
         console.log lines
         execSql createTableSql(name, lines[0].split ','),

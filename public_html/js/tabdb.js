@@ -57,6 +57,7 @@
     return _createDataTable = function(name, data) {
       var lines;
       console.log('_createDataTable');
+      console.log(data);
       lines = data.split("\n");
       console.log(lines);
       execSql(createTableSql(name, lines[0].split(',')), console.log(lines));
