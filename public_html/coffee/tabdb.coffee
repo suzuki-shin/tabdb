@@ -54,12 +54,13 @@ saveIfNotExists = (name, data) ->
         lines = data.split "\n"
         console.log lines
         execSql createTableSql(name, lines[0].split ','),
-        console.log lines
-        execSql insertTableSql name, lines
+                [],
+                _insertDataTable name, lines
 
-#     _insertDataTable = (name, data = []) ->
-#         console.log '_insertDataTable start'
-#         insertTableSql(name, data)
+        _insertDataTable = (name, data = []) ->
+            console.log '_insertDataTable start'
+            execSql insertTableSql name, data
+#           insertTableSql(name, data)
 
 
 createTableSql = (name, cols = []) ->

@@ -55,13 +55,17 @@
       return execSql('INSERT INTO tabdb_tables (name) VALUES (?)', [name]);
     };
     return _createDataTable = function(name, data) {
-      var lines;
+      var lines, _insertDataTable;
       console.log('_createDataTable');
       console.log(data);
       lines = data.split("\n");
       console.log(lines);
-      execSql(createTableSql(name, lines[0].split(',')), console.log(lines));
-      return execSql(insertTableSql(name, lines));
+      execSql(createTableSql(name, lines[0].split(',')), [], _insertDataTable(name, lines));
+      return _insertDataTable = function(name, data) {
+        if (data == null) data = [];
+        console.log('_insertDataTable start');
+        return execSql(insertTableSql(name, data));
+      };
     };
   };
 
