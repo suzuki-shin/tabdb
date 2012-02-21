@@ -1,5 +1,5 @@
 (function() {
-  var createTabdbTables, createTableSql, db, execSelectAndLog, execSql, failureLog, insertTableSql, saveIfNotExists, selectFile, successLog, where_name_eq;
+  var createDataTable, createTabdbTables, createTableSql, db, execSelectAndLog, execSql, failureLog, insertData, saveIfNotExists, selectFile, successLog, where_name_eq;
 
   where_name_eq = ' where name = ?';
 
@@ -15,7 +15,7 @@
     return console.log(mes);
   };
 
-  execSql = function(sql, params, success_callback, failure_callback) {
+  execSql = function(tx, sql, params, success_callback, failure_callback) {
     if (params == null) params = [];
     if (success_callback == null) success_callback = successLog;
     if (failure_callback == null) failure_callback = failureLog;
@@ -27,46 +27,49 @@
     });
   };
 
-  createTabdbTables = function() {
+  createTabdbTables = function(tx) {
     console.log('createTabdbTables start');
-    return execSql('CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)');
+    return execSql(tx, 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)');
   };
 
-  saveIfNotExists = function(name, data) {
-    var _createDataTable, _insertTabdbTables;
+  createDataTable = function(tx, name, data) {
+    var lines, _insertDataTable;
+    console.log('createDataTable');
+    console.log(data);
+    lines = data.split("\n");
+    console.log(lines);
+    _insertDataTable = function(tx, name, data) {
+      if (data == null) data = [];
+      console.log('_insertDataTable start');
+      return insertData(tx, name, data);
+    };
+    return execSql(tx, createTableSql(name, lines[0].split(',')), [], function(tx) {
+      return _insertDataTable(tx, name, lines);
+    });
+  };
+
+  saveIfNotExists = function(tx, name, data) {
+    var _insertTabdbTables;
     console.log('saveIfNotExists start');
     console.log(data);
-    execSql('SELECT name FROM tabdb_tables' + where_name_eq, [name], function(tx, res) {
+    _insertTabdbTables = function(tx, name) {
+      console.log('_insertTabdbTables start');
+      return execSql(tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]);
+    };
+    return execSql(tx, 'SELECT name FROM tabdb_tables' + where_name_eq, [name], function(tx, res) {
       console.log(res.rows);
       if (res.rows.length > 0) {
         return console.log('already exist table');
       } else {
-        _insertTabdbTables(name);
+        _insertTabdbTables(tx, name);
         console.log(data);
-        return _createDataTable(name, data);
+        return createDataTable(tx, name, data);
       }
     }, function(tx, res) {
-      createTabdbTables();
-      _insertTabdbTables(name);
-      return _createDataTable(name, data);
+      createTabdbTables(tx);
+      _insertTabdbTables(tx, name);
+      return createDataTable(tx, name, data);
     });
-    _insertTabdbTables = function(name) {
-      console.log('_insertTabdbTables start');
-      return execSql('INSERT INTO tabdb_tables (name) VALUES (?)', [name]);
-    };
-    return _createDataTable = function(name, data) {
-      var lines, _insertDataTable;
-      console.log('_createDataTable');
-      console.log(data);
-      lines = data.split("\n");
-      console.log(lines);
-      execSql(createTableSql(name, lines[0].split(',')), [], _insertDataTable(name, lines));
-      return _insertDataTable = function(name, data) {
-        if (data == null) data = [];
-        console.log('_insertDataTable start');
-        return execSql(insertTableSql(name, data));
-      };
-    };
   };
 
   createTableSql = function(name, cols) {
@@ -83,10 +86,10 @@
     })()) + ")";
   };
 
-  insertTableSql = function(name, data) {
+  insertData = function(tx, name, data) {
     var d, d_, quoted, _i, _len, _ref, _results;
     if (data == null) data = [];
-    console.log('insertTableSql');
+    console.log('insertData');
     console.log(name);
     console.log(data);
     _ref = data.splice(1);
@@ -103,7 +106,7 @@
         }
         return _results2;
       })();
-      _results.push(execSql("insert into " + name + " (" + data[0] + ") values (" + quoted + ")"));
+      _results.push(execSql(tx, "insert into " + name + " (" + data[0] + ") values (" + quoted + ")"));
     }
     return _results;
   };
@@ -120,7 +123,9 @@
       textData = reader.result;
       alert(textData);
       console.log(textData.split("\n"));
-      return saveIfNotExists(file.name, textData);
+      return db.transaction(function(tx) {
+        return saveIfNotExists(tx, file.name, textData);
+      });
     };
     return reader.onerror = function(ev) {
       return alert('error');
@@ -146,17 +151,18 @@
       }
       return _results;
     };
-    return execSql("select * from " + table_name, [], _log);
+    return db.transaction(function(tx) {
+      return execSql(tx, "select * from " + table_name, [], _log);
+    });
   };
 
   $(function() {
     $(document).on('change', '#selectFile', selectFile);
     return $('#test').click(function() {
       alert('hoge fuga');
-      execSelectAndLog('tabdb_tables', ['name']);
-      execSelectAndLog('bbb', ['a', 'b', 'c']);
-      console.log(createTableSql('ABC', ['a', 'b', 'c']));
-      return saveIfNotExists('ABC', "a,b,c\nAAA,BBB,1\nXXX,YYY,2\n");
+      return db.transaction(function(tx) {
+        return createDataTable(tx, 'DEF', "a,b,c\nAAAX,BXBB,1\nXUXX,YUYY,2\n");
+      });
     });
   });
 
