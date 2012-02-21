@@ -106,7 +106,7 @@
         }
         return _results2;
       })();
-      _results.push(execSql(tx, "insert into " + name + " (" + data[0] + ") values (" + quoted + ")"));
+      _results.push(execSql(tx, "insert into '" + name + ("' (" + data[0] + ") values (" + quoted + ")")));
     }
     return _results;
   };

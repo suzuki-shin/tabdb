@@ -74,7 +74,7 @@ insertData = (tx, name, data = []) ->
     console.log data
     for d in data.splice 1
         quoted = ("'" + d_ + "'" for d_ in d.split ',')
-        execSql tx, "insert into #{name} (#{data[0]}) values (#{quoted})"
+        execSql tx, "insert into '" + name + "' (#{data[0]}) values (#{quoted})"
 
 # file api
 selectFile = (ev) ->
