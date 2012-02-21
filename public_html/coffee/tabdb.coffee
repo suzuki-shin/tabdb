@@ -66,7 +66,7 @@ saveIfNotExists = (tx, name, data) ->
 
 
 createTableSql = (name, cols = []) ->
-    "CREATE TABLE IF NOT EXISTS '#{name}' (" + (" #{c} TEXT " for c in cols) + ")"
+    "CREATE TABLE IF NOT EXISTS '" + name + "' (" + (" #{c} TEXT " for c in cols) + ")"
 
 insertData = (tx, name, data = []) ->
     console.log 'insertData'

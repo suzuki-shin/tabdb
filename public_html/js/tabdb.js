@@ -75,7 +75,7 @@
   createTableSql = function(name, cols) {
     var c;
     if (cols == null) cols = [];
-    return ("CREATE TABLE IF NOT EXISTS " + name + " (") + ((function() {
+    return "CREATE TABLE IF NOT EXISTS '" + name + "' (" + ((function() {
       var _i, _len, _results;
       _results = [];
       for (_i = 0, _len = cols.length; _i < _len; _i++) {
