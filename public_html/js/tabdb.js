@@ -123,7 +123,7 @@
       textData = reader.result;
       alert(textData);
       console.log(textData.split("\n"));
-      file_name = file.name.match(/^(\w+)/);
+      file_name = (file.name.match(/^(\w+)/))[0];
       file_name || (file_name = 'xxxxx');
       console.log(file_name);
       return db.transaction(function(tx) {

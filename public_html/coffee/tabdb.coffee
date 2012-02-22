@@ -91,7 +91,7 @@ selectFile = (ev) ->
         textData = reader.result
         alert textData
         console.log textData.split("\n")
-        file_name = file.name.match /^(\w+)/
+        file_name = (file.name.match /^(\w+)/)[0]
         file_name or= 'xxxxx'
         console.log file_name
         db.transaction (tx) -> saveIfNotExists(tx, file_name, textData)
