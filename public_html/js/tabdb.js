@@ -118,13 +118,16 @@
     reader = new FileReader();
     reader.readAsText(file);
     reader.onload = function(ev) {
-      var textData;
+      var file_name, textData;
       console.log('readeronload');
       textData = reader.result;
       alert(textData);
       console.log(textData.split("\n"));
+      file_name = file.name.match(/^(\w+)/);
+      file_name || (file_name = 'xxxxx');
+      console.log(file_name);
       return db.transaction(function(tx) {
-        return saveIfNotExists(tx, file.name, textData);
+        return saveIfNotExists(tx, file_name, textData);
       });
     };
     return reader.onerror = function(ev) {
