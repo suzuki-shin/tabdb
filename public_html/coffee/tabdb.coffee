@@ -39,7 +39,7 @@ createDataTable = (tx, name, data) ->
 
     execSql tx, createTableSql(name, lines[0].split ','),
             [],
-            (tx) -> _insertDataTable(tx, name, lines) # なんかこれがexecSql createTableSqlより先に実行されてるっぽい => あー、txを引継いでないからか、、、
+            (tx) -> _insertDataTable(tx, name, lines)
 
 saveIfNotExists = (tx, name, data) ->
     console.log 'saveIfNotExists start'
