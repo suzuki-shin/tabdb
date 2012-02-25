@@ -4,9 +4,7 @@
   # config
   */
 
-  var createDataTable, createTabdbTables, createTableSql, db, execSelectAndLog, execSql, failureLog, getColsOf, insertData, saveIfNotExists, selectFile, selectTables, selectToConsoleLog, selectToTable, successLog, where_name_eq;
-
-  where_name_eq = ' where name = ?';
+  var createDataTable, createTabdbTables, createTableSql, db, execSelectAndLog, execSql, failureLog, getColsOf, insertData, saveIfNotExists, selectFile, selectTables, selectToConsoleLog, selectToTable, successLog;
 
   db = window.openDatabase("tabdb", "", "TABDB", 1048576);
 
@@ -31,9 +29,7 @@
     console.log('execSql start');
     console.log(sql);
     console.log(params);
-    return db.transaction(function(tx) {
-      return tx.executeSql(sql, params, success_callback, failure_callback);
-    });
+    return tx.executeSql(sql, params, success_callback, failure_callback);
   };
 
   createTabdbTables = function(tx) {
@@ -65,7 +61,7 @@
       console.log('_insertTabdbTables start');
       return execSql(tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]);
     };
-    return execSql(tx, 'SELECT name FROM tabdb_tables' + where_name_eq, [name], function(tx, res) {
+    return execSql(tx, 'SELECT name FROM tabdb_tables WHERE name = ?', [name], function(tx, res) {
       console.log(res.rows);
       if (res.rows.length > 0) {
         return console.log('already exist table');
@@ -164,17 +160,12 @@
     };
   };
 
-  execSelectAndLog = function(table_name, cols) {
-    return db.transaction(function(tx) {
-      return execSql(tx, "select * from " + table_name, [], selectToConsoleLog(cols));
-    });
+  execSelectAndLog = function(tx, table_name, cols) {
+    return execSql(tx, "SELECT * FROM " + table_name, [], selectToConsoleLog(cols));
   };
 
-  selectTables = function(table_name, cols, jqobj, disp_func) {
-    if (disp_func == null) disp_func = selectToConsoleLog;
-    return db.transaction(function(tx) {
-      return execSql(tx, "select * from " + table_name, [], disp_func(cols, jqobj));
-    });
+  selectTables = function(tx, table_name, cols, jqobj, func) {
+    return execSql(tx, "SELECT * FROM " + table_name, [], func(cols, jqobj));
   };
 
   selectToTable = function(cols, jqobj) {
@@ -190,7 +181,6 @@
         }
         return _results;
       })();
-      console.log(items);
       jqobj.empty().append('<table>');
       for (_i = 0, _len = items.length; _i < _len; _i++) {
         it = items[_i];
@@ -224,9 +214,10 @@
     $(document).on('change', '#selectFile', selectFile);
     return $('#test').click(function() {
       alert('hoge fuga');
-      selectTables('hoge', ['id', 'name'], $('#test'), selectToTable);
       return db.transaction(function(tx) {
-        return getColsOf(tx, 'hoge');
+        getColsOf(tx, 'hoge');
+        selectTables(tx, 'hoge', ['id', 'name'], $('#test'), selectToTable);
+        return execSelectAndLog(tx, 'tabdb_tables', ['name']);
       });
     });
   });

@@ -1,8 +1,6 @@
 ###
 # config
 ###
-where_name_eq = ' where name = ?'
-
 db = window.openDatabase "tabdb","","TABDB", 1048576
 
 ###
@@ -23,8 +21,7 @@ execSql = (tx, sql, params = [], success_callback = successLog, failure_callback
   console.log 'execSql start'
   console.log sql
   console.log params
-  db.transaction (tx) ->
-    tx.executeSql sql, params, success_callback, failure_callback
+  tx.executeSql sql, params, success_callback, failure_callback
 
 
 createTabdbTables = (tx) ->
@@ -55,7 +52,7 @@ saveIfNotExists = (tx, name, data) ->
     console.log '_insertTabdbTables start'
     execSql tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]
 
-  execSql tx, 'SELECT name FROM tabdb_tables' + where_name_eq,
+  execSql tx, 'SELECT name FROM tabdb_tables WHERE name = ?',
           [name],
           (tx, res) ->
             console.log res.rows
@@ -112,27 +109,44 @@ selectToConsoleLog = (cols) ->
       console.log (cols[j] + ': ' +  res.rows.item(i)[cols[j]] for j in [0...cols.length])
 
 # 指定したテーブルの中身をselectしてconsole.logに出力する
-execSelectAndLog = (table_name, cols) ->
-  db.transaction (tx) -> execSql(tx, "select * from #{table_name}", [], selectToConsoleLog(cols))
+# args
+#   tx:
+#   table_name: 対象のテーブル名
+#   cols: カラム名のリスト
+execSelectAndLog = (tx, table_name, cols) ->
+  execSql tx, "SELECT * FROM #{table_name}", [], selectToConsoleLog(cols)
 
-selectTables = (table_name, cols, jqobj, disp_func = selectToConsoleLog) ->
-  db.transaction (tx) -> execSql(tx, "select * from #{table_name}", [], disp_func(cols, jqobj))
+# 指定したテーブルの中身をselectして、funcで処理する
+# args
+#   tx:
+#   table_name: 対象のテーブル名
+#   cols:       カラム名のリスト
+#   jqobj:      操作対象のjQueryオブジェクト
+#   func FUNCTION: colsとjqueryオブジェクトを受け取りごにょごにょする2引数の関数
+selectTables = (tx, table_name, cols, jqobj, func) ->
+  execSql tx, "SELECT * FROM #{table_name}", [], func(cols, jqobj)
 
 # selectした結果のtxとresを受け取ってそれをHTMLのテーブルにして追加する関数を返す
+# args
+#   cols: カラム名のリスト
+#   jqobj: HTMLテーブルのタグを追加したい対象のjQueryオブジェクト
+# return
+#   _selectToTable FUNCTION: txとresを受け取ってHTMLのテーブルを追加する関数
 selectToTable = (cols, jqobj) ->
   _selectToTable = (tx, res) ->
     len = res.rows.length
     items = (res.rows.item(i) for i in [0...len])
-    console.log items
+#     console.log items
     jqobj.empty().append '<table>'
     for it in items
       jqobj.append '<tr><th>' + c + '</th><td>' + it[c] + '</td></tr>' for c in cols
     jqobj.append '</table>'
 
 # テーブルのカラムを取得する
-# tx
-# table_name : 対象テーブル名
-# callback   : colsを引数にとる1引数の関数。colsを使ってしたい実処理。
+# args
+#   tx
+#   table_name : 対象テーブル名
+#   callback   : colsを引数にとる1引数の関数。colsを使ってしたい実処理。
 getColsOf = (tx, table_name, callback = (cols) -> console.log cols) ->
   execSql tx, "SELECT sql FROM sqlite_master WHERE name = ?", [table_name],
           (tx, res) ->
@@ -146,8 +160,10 @@ $ ->
 
   $('#test').click ->
     alert 'hoge fuga'
-    selectTables 'hoge', ['id', 'name'],  $('#test'), selectToTable
-    db.transaction (tx) -> getColsOf tx, 'hoge'
+    db.transaction (tx) ->
+      getColsOf tx, 'hoge'
+      selectTables tx, 'hoge', ['id', 'name'],  $('#test'), selectToTable
+      execSelectAndLog tx, 'tabdb_tables', ['name']
 
 #     db.transaction (tx) -> createDataTable tx, 'DEF', "a,b,c\nAAAX,BXBB,1\nXUXX,YUYY,2\n"
 #         createTabdbTables()
