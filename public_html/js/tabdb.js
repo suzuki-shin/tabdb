@@ -50,8 +50,6 @@
     var d, d_, quoted, _i, _len, _ref, _results;
     if (data == null) data = [];
     console.log('insertData');
-    console.log(name);
-    console.log(data);
     _ref = data.splice(1);
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -72,8 +70,7 @@
   };
 
   selectToConsoleLog = function(cols) {
-    var _selectToConsoleLog;
-    return _selectToConsoleLog = function(tx, res) {
+    return function(tx, res) {
       var i, j, len, _results;
       len = res.rows.length;
       _results = [];
@@ -91,17 +88,8 @@
     };
   };
 
-  execSelectAndLog = function(tx, table_name, cols) {
-    return execSql(tx, "SELECT * FROM " + table_name, [], selectToConsoleLog(cols));
-  };
-
-  selectTables = function(tx, table_name, cols, jqobj, func) {
-    return execSql(tx, "SELECT * FROM " + table_name, [], func(cols, jqobj));
-  };
-
   selectToTable = function(cols, jqobj) {
-    var _selectToTable;
-    return _selectToTable = function(tx, res) {
+    return function(tx, res) {
       var c, i, it, items, len, _i, _j, _len, _len2;
       len = res.rows.length;
       items = (function() {
@@ -124,15 +112,37 @@
     };
   };
 
+  execSelectAndLog = function(tx, table_name) {
+    return getColsOf(tx, table_name, function(cols) {
+      return execSql(tx, "SELECT * FROM " + table_name, [], selectToConsoleLog(cols));
+    });
+  };
+
+  selectTables = function(tx, table_name, jqobj, func) {
+    return getColsOf(tx, table_name, function(cols) {
+      return execSql(tx, "SELECT * FROM " + table_name, [], func(cols, jqobj));
+    });
+  };
+
   getColsOf = function(tx, table_name, callback) {
     if (callback == null) {
-      callback = function(cols) {
-        return console.log(cols);
+      callback = function(x) {
+        return console.log(x);
       };
     }
+    console.log('getColsOf');
     return execSql(tx, "SELECT sql FROM sqlite_master WHERE name = ?", [table_name], function(tx, res) {
-      var cols;
-      cols = (res.rows.item(0).sql.match(/\((.+)\)/))[1].split(',');
+      var c, cols, cols_with_type;
+      cols_with_type = (res.rows.item(0).sql.match(/\((.+)\)/))[1].split(',');
+      cols = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = cols_with_type.length; _i < _len; _i++) {
+          c = cols_with_type[_i];
+          _results.push((c.match(/(\w+)\s+(.+)/))[1]);
+        }
+        return _results;
+      })();
       return callback(cols);
     });
   };
@@ -209,9 +219,7 @@
     return $('#test').click(function() {
       alert('hoge fuga');
       return db.transaction(function(tx) {
-        getColsOf(tx, 'hoge');
-        selectTables(tx, 'hoge', ['id', 'name'], $('#test'), selectToTable);
-        return execSelectAndLog(tx, 'tabdb_tables', ['name']);
+        return execSelectAndLog(tx, 'tabdb_tables');
       });
     });
   });

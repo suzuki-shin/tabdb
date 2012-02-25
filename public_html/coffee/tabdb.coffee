@@ -29,45 +29,27 @@ createTableSql = (name, cols = []) ->
 
 insertData = (tx, name, data = []) ->
   console.log 'insertData'
-  console.log name
-  console.log data
+#   console.log name
+#   console.log data
   for d in data.splice 1
     quoted = ("'" + d_ + "'" for d_ in d.split ',')
     execSql tx, "INSERT INTO '" + name + "' (#{data[0]}) VALUES (#{quoted})"
 
-# select結果のtxとresを受け取り(自由変数のcolsのカラムの値を)、console.logに出力する
+# select結果のtxとresを受け取り(自由変数のcolsのカラムの値を)、console.logに出力する関数を返す
 selectToConsoleLog = (cols) ->
-  _selectToConsoleLog = (tx, res) ->
+  (tx, res) ->
     len = res.rows.length
     for i in [0...len]
       console.log (cols[j] + ': ' +  res.rows.item(i)[cols[j]] for j in [0...cols.length])
-
-# 指定したテーブルの中身をselectしてconsole.logに出力する
-# args
-#   tx:
-#   table_name: 対象のテーブル名
-#   cols: カラム名のリスト
-execSelectAndLog = (tx, table_name, cols) ->
-  execSql tx, "SELECT * FROM #{table_name}", [], selectToConsoleLog(cols)
-
-# 指定したテーブルの中身をselectして、funcで処理する
-# args
-#   tx:
-#   table_name: 対象のテーブル名
-#   cols:       カラム名のリスト
-#   jqobj:      操作対象のjQueryオブジェクト
-#   func FUNCTION: colsとjqueryオブジェクトを受け取りごにょごにょする2引数の関数
-selectTables = (tx, table_name, cols, jqobj, func) ->
-  execSql tx, "SELECT * FROM #{table_name}", [], func(cols, jqobj)
 
 # selectした結果のtxとresを受け取ってそれをHTMLのテーブルにして追加する関数を返す
 # args
 #   cols: カラム名のリスト
 #   jqobj: HTMLテーブルのタグを追加したい対象のjQueryオブジェクト
 # return
-#   _selectToTable FUNCTION: txとresを受け取ってHTMLのテーブルを追加する関数
+#   FUNCTION: txとresを受け取ってHTMLのテーブルを追加する関数
 selectToTable = (cols, jqobj) ->
-  _selectToTable = (tx, res) ->
+  (tx, res) ->
     len = res.rows.length
     items = (res.rows.item(i) for i in [0...len])
 #     console.log items
@@ -76,15 +58,37 @@ selectToTable = (cols, jqobj) ->
       jqobj.append '<tr><th>' + c + '</th><td>' + it[c] + '</td></tr>' for c in cols
     jqobj.append '</table>'
 
-# テーブルのカラムを取得する
+# 指定したテーブルの中身をselectしてconsole.logに出力する
+# args
+#   tx:
+#   table_name: 対象のテーブル名
+#   cols: カラム名のリスト
+execSelectAndLog = (tx, table_name) ->
+  getColsOf tx, table_name,
+            (cols) -> execSql tx, "SELECT * FROM #{table_name}", [], selectToConsoleLog(cols)
+
+# 指定したテーブルの中身をselectして、funcで処理する
+# args
+#   tx:
+#   table_name: 対象のテーブル名
+#   cols:       カラム名のリスト
+#   jqobj:      操作対象のjQueryオブジェクト
+#   func FUNCTION: colsとjqueryオブジェクトを受け取りごにょごにょする2引数の関数
+selectTables = (tx, table_name, jqobj, func) ->
+  getColsOf tx, table_name,
+            (cols) -> execSql tx, "SELECT * FROM #{table_name}", [], func(cols, jqobj)
+
+# テーブルのカラムを取得してそれを使用してごにょごにょする
 # args
 #   tx
 #   table_name : 対象テーブル名
 #   callback   : colsを引数にとる1引数の関数。colsを使ってしたい実処理。
-getColsOf = (tx, table_name, callback = (cols) -> console.log cols) ->
+getColsOf = (tx, table_name, callback = (x) -> console.log x) ->
+  console.log 'getColsOf'
   execSql tx, "SELECT sql FROM sqlite_master WHERE name = ?", [table_name],
           (tx, res) ->
-            cols = (res.rows.item(0).sql.match /\((.+)\)/)[1].split ','
+            cols_with_type = (res.rows.item(0).sql.match /\((.+)\)/)[1].split ','
+            cols = ((c.match /(\w+)\s+(.+)/)[1] for c in cols_with_type)
             callback cols
 
 ###
@@ -97,13 +101,7 @@ createTabdbTables = (tx) ->
 
 createDataTable = (tx, name, data) ->
   console.log 'createDataTable'
-#    console.log (line.split ',' for line in data.split "\n")
-#   console.log data
   lines = data.split "\n"
-#   console.log lines
-#   _insertDataTable = (tx, name, data = []) ->
-#     console.log '_insertDataTable start'
-#     insertData tx, name, data
   execSql tx, createTableSql(name, lines[0].split ','), [],
           (tx) -> insertData tx, name, lines
 
@@ -160,9 +158,9 @@ $ ->
   $('#test').click ->
     alert 'hoge fuga'
     db.transaction (tx) ->
-      getColsOf tx, 'hoge'
-      selectTables tx, 'hoge', ['id', 'name'],  $('#test'), selectToTable
-      execSelectAndLog tx, 'tabdb_tables', ['name']
+#      getColsOf tx, 'hoge'
+#       selectTables tx, 'hoge', $('#test'), selectToTable
+      execSelectAndLog tx, 'tabdb_tables'
 
 #     db.transaction (tx) -> createDataTable tx, 'DEF', "a,b,c\nAAAX,BXBB,1\nXUXX,YUYY,2\n"
 #         createTabdbTables()
