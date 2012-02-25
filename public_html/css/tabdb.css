@@ -3,3 +3,33 @@
 	color: green;
 	font-size: 1000%;
 }
+
+/* http://www.d-spica.com/designcatalog/table/table001.html */
+table.table001 {
+  margin-top: 0.2em;
+  margin-bottom: 1em;
+  width: 570px;
+  border-collapse: separate;
+  border-spacing: 2px;
+  font-size: 100%;
+}
+table.table001 caption {
+  margin-top: 1em;
+  text-align: right;
+}
+table.table001 th,
+table.table001 td {
+  padding: 4px 6px;
+}
+table.table001 th {
+  background: #1B3AB4;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 92%;
+  color: #FFF;
+}
+table.table001 td {
+  background: #E5EAFF;
+  text-align: right;
+  white-space: nowrap;
+}

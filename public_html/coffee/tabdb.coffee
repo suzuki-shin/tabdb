@@ -49,15 +49,14 @@ selectToConsoleLog = (cols) ->
 #   jqobj: HTMLテーブルのタグを追加したい対象のjQueryオブジェクト
 # return
 #   FUNCTION: txとresを受け取ってHTMLのテーブルを追加する関数
-selectToTable = (cols, jqobj) ->
+selectToTable = (table_name, cols, jqobj) ->
   (tx, res) ->
     len = res.rows.length
     items = (res.rows.item(i) for i in [0...len])
-#     console.log items
-    jqobj.empty().append '<table>'
-    for it in items
-      jqobj.append '<tr><th>' + c + '</th><td>' + it[c] + '</td></tr>' for c in cols
-    jqobj.append '</table>'
+    console.log items
+#     names = (console.log col.name for col in items[0])
+#     console.log names
+    jqobj.empty().append '<table class="table001"><caption>' + table_name + '</caption><tr>' + ('<th>' + c + '</th>' for c in cols).join('') + '</tr>' + ('<tr>' + ('<td>' + it[c] + '</td>' for c in cols) + '</tr>' for it in items) + '</table>'
 
 # 指定したテーブルの中身をselectしてconsole.logに出力する
 # args
@@ -74,10 +73,10 @@ execSelectAndLog = (tx, table_name) ->
 #   table_name: 対象のテーブル名
 #   cols:       カラム名のリスト
 #   jqobj:      操作対象のjQueryオブジェクト
-#   func FUNCTION: colsとjqueryオブジェクトを受け取りごにょごにょする2引数の関数
+#   func FUNCTION: table_nameとcolsとjqueryオブジェクトを受け取りごにょごにょする2引数の関数
 selectTables = (tx, table_name, jqobj, func) ->
   getColsOf tx, table_name,
-            (cols) -> execSql tx, "SELECT * FROM #{table_name}", [], func(cols, jqobj)
+            (cols) -> execSql tx, "SELECT * FROM #{table_name}", [], func(table_name, cols, jqobj)
 
 # テーブルのカラムを取得してそれを使用してごにょごにょする
 # args
@@ -160,8 +159,8 @@ $ ->
     alert 'hoge fuga'
     db.transaction (tx) ->
 #      getColsOf tx, 'hoge'
-#       selectTables tx, 'hoge', $('#test'), selectToTable
-      execSelectAndLog tx, 'tabdb_tables'
+      selectTables tx, 'hoge', $('#test'), selectToTable
+#       execSelectAndLog tx, 'tabdb_tables'
 
 #     db.transaction (tx) -> createDataTable tx, 'DEF', "a,b,c\nAAAX,BXBB,1\nXUXX,YUYY,2\n"
 #         createTabdbTables()

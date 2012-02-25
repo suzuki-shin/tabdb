@@ -88,9 +88,9 @@
     };
   };
 
-  selectToTable = function(cols, jqobj) {
+  selectToTable = function(table_name, cols, jqobj) {
     return function(tx, res) {
-      var c, i, it, items, len, _i, _j, _len, _len2;
+      var c, i, it, items, len;
       len = res.rows.length;
       items = (function() {
         var _results;
@@ -100,15 +100,32 @@
         }
         return _results;
       })();
-      jqobj.empty().append('<table>');
-      for (_i = 0, _len = items.length; _i < _len; _i++) {
-        it = items[_i];
-        for (_j = 0, _len2 = cols.length; _j < _len2; _j++) {
-          c = cols[_j];
-          jqobj.append('<tr><th>' + c + '</th><td>' + it[c] + '</td></tr>');
+      console.log(items);
+      return jqobj.empty().append('<table class="table001"><caption>' + table_name + '</caption><tr>' + ((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = cols.length; _i < _len; _i++) {
+          c = cols[_i];
+          _results.push('<th>' + c + '</th>');
         }
-      }
-      return jqobj.append('</table>');
+        return _results;
+      })()).join('') + '</tr>' + ((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = items.length; _i < _len; _i++) {
+          it = items[_i];
+          _results.push('<tr>' + ((function() {
+            var _j, _len2, _results2;
+            _results2 = [];
+            for (_j = 0, _len2 = cols.length; _j < _len2; _j++) {
+              c = cols[_j];
+              _results2.push('<td>' + it[c] + '</td>');
+            }
+            return _results2;
+          })()) + '</tr>');
+        }
+        return _results;
+      })()) + '</table>');
     };
   };
 
@@ -120,7 +137,7 @@
 
   selectTables = function(tx, table_name, jqobj, func) {
     return getColsOf(tx, table_name, function(cols) {
-      return execSql(tx, "SELECT * FROM " + table_name, [], func(cols, jqobj));
+      return execSql(tx, "SELECT * FROM " + table_name, [], func(table_name, cols, jqobj));
     });
   };
 
@@ -219,7 +236,7 @@
     return $('#test').click(function() {
       alert('hoge fuga');
       return db.transaction(function(tx) {
-        return execSelectAndLog(tx, 'tabdb_tables');
+        return selectTables(tx, 'hoge', $('#test'), selectToTable);
       });
     });
   });
