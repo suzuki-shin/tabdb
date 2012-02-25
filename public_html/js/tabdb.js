@@ -151,7 +151,7 @@
     console.log('createDataTable');
     lines = data.split("\n");
     return execSql(tx, createTableSql(name, lines[0].split(',')), [], function(tx) {
-      return insertDataTable(tx, name, lines);
+      return insertData(tx, name, lines);
     });
   };
 

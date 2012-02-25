@@ -105,7 +105,7 @@ createDataTable = (tx, name, data) ->
 #     console.log '_insertDataTable start'
 #     insertData tx, name, data
   execSql tx, createTableSql(name, lines[0].split ','), [],
-          (tx) -> insertDataTable tx, name, lines
+          (tx) -> insertData tx, name, lines
 
 saveIfNotExists = (tx, name, data) ->
   console.log 'saveIfNotExists start'
