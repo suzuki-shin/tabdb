@@ -27,6 +27,7 @@ execSql = (tx, sql, params = [], success_callback = successLog, failure_callback
 createTableSql = (name, cols = []) ->
   "CREATE TABLE IF NOT EXISTS '" + name + "' (" + (" #{c} TEXT " for c in cols) + ")"
 
+# 0番目の要素がカラム名のカンマ区切り、それ以降がデータのカンマ区切りであるようなdataをとり、指定テーブルにインサートする
 insertData = (tx, name, data = []) ->
   console.log 'insertData'
 #   console.log name
