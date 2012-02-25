@@ -1,9 +1,18 @@
 (function() {
-  var createDataTable, createTabdbTables, createTableSql, db, execSelectAndLog, execSql, failureLog, insertData, saveIfNotExists, selectFile, successLog, where_name_eq;
+
+  /*
+  # config
+  */
+
+  var createDataTable, createTabdbTables, createTableSql, db, execSelectAndLog, execSql, failureLog, insertData, saveIfNotExists, selectFile, selectTables, selectToConsoleLog, selectToTable, successLog, where_name_eq;
 
   where_name_eq = ' where name = ?';
 
   db = window.openDatabase("tabdb", "", "TABDB", 1048576);
+
+  /*
+  # functions
+  */
 
   successLog = function(mes) {
     console.log('[success]');
@@ -135,10 +144,9 @@
     };
   };
 
-  execSelectAndLog = function(table_name, cols) {
-    var _log;
-    if (cols == null) cols = [];
-    _log = function(tx, res) {
+  selectToConsoleLog = function(cols) {
+    var _selectToConsoleLog;
+    return _selectToConsoleLog = function(tx, res) {
       var i, j, len, _results;
       len = res.rows.length;
       _results = [];
@@ -154,18 +162,56 @@
       }
       return _results;
     };
+  };
+
+  execSelectAndLog = function(table_name, cols) {
     return db.transaction(function(tx) {
-      return execSql(tx, "select * from " + table_name, [], _log);
+      return execSql(tx, "select * from " + table_name, [], selectToConsoleLog(cols));
     });
   };
+
+  selectTables = function(table_name, cols, jqobj, disp_func) {
+    if (disp_func == null) disp_func = selectToConsoleLog;
+    return db.transaction(function(tx) {
+      return execSql(tx, "select * from " + table_name, [], disp_func(cols, jqobj));
+    });
+  };
+
+  selectToTable = function(cols, jqobj) {
+    var _selectToTable;
+    return _selectToTable = function(tx, res) {
+      var c, i, it, items, len, _i, _j, _len, _len2;
+      len = res.rows.length;
+      items = (function() {
+        var _results;
+        _results = [];
+        for (i = 0; 0 <= len ? i < len : i > len; 0 <= len ? i++ : i--) {
+          _results.push(res.rows.item(i));
+        }
+        return _results;
+      })();
+      console.log(items);
+      jqobj.empty().append('<table>');
+      for (_i = 0, _len = items.length; _i < _len; _i++) {
+        it = items[_i];
+        for (_j = 0, _len2 = cols.length; _j < _len2; _j++) {
+          c = cols[_j];
+          jqobj.append('<tr><th>' + c + '</th><td>' + it[c] + '</td></tr>');
+        }
+      }
+      return jqobj.append('</table>');
+    };
+  };
+
+  /*
+  # event
+  */
 
   $(function() {
     $(document).on('change', '#selectFile', selectFile);
     return $('#test').click(function() {
       alert('hoge fuga');
-      return db.transaction(function(tx) {
-        return createDataTable(tx, 'DEF', "a,b,c\nAAAX,BXBB,1\nXUXX,YUYY,2\n");
-      });
+      return selectTables('hoge', ['id', 'name'], $('#test'), selectToTable);
     });
   });
 
