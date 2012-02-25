@@ -4,7 +4,7 @@
 db = window.openDatabase "tabdb","","TABDB", 1048576
 
 ###
-# functions
+# 汎用関数
 ###
 # execSqlのsuccess_callbackのdefault
 successLog = (mes) ->
@@ -23,51 +23,7 @@ execSql = (tx, sql, params = [], success_callback = successLog, failure_callback
   console.log params
   tx.executeSql sql, params, success_callback, failure_callback
 
-
-createTabdbTables = (tx) ->
-  console.log 'createTabdbTables start'
-  execSql tx, 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)'
-
-
-createDataTable = (tx, name, data) ->
-  console.log 'createDataTable'
-#    console.log (line.split ',' for line in data.split "\n")
-  console.log data
-  lines = data.split "\n"
-  console.log lines
-
-  _insertDataTable = (tx, name, data = []) ->
-    console.log '_insertDataTable start'
-    insertData tx, name, data
-
-  execSql tx, createTableSql(name, lines[0].split ','),
-      [],
-      (tx) -> _insertDataTable(tx, name, lines)
-
-saveIfNotExists = (tx, name, data) ->
-  console.log 'saveIfNotExists start'
-  console.log data
-
-  _insertTabdbTables = (tx, name) ->
-    console.log '_insertTabdbTables start'
-    execSql tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]
-
-  execSql tx, 'SELECT name FROM tabdb_tables WHERE name = ?',
-          [name],
-          (tx, res) ->
-            console.log res.rows
-            if res.rows.length > 0
-              console.log 'already exist table'
-            else
-              _insertTabdbTables tx, name
-              console.log data
-              createDataTable tx, name, data
-          (tx, res) ->
-            createTabdbTables tx
-            _insertTabdbTables tx, name
-            createDataTable tx, name, data
-
-
+# CREATE TABLE文を返す(**カラムの型は全部TEXT**)
 createTableSql = (name, cols = []) ->
   "CREATE TABLE IF NOT EXISTS '" + name + "' (" + (" #{c} TEXT " for c in cols) + ")"
 
@@ -77,29 +33,7 @@ insertData = (tx, name, data = []) ->
   console.log data
   for d in data.splice 1
     quoted = ("'" + d_ + "'" for d_ in d.split ',')
-    execSql tx, "insert into '" + name + "' (#{data[0]}) values (#{quoted})"
-
-# file api
-selectFile = (ev) ->
-  file = ev.target.files[0]
-  alert file.name + ' is selected!'
-
-  reader = new FileReader()
-  reader.readAsText(file)
-
-  reader.onload = (ev) ->
-    console.log 'readeronload'
-    textData = reader.result
-    alert textData
-    console.log textData.split("\n")
-    file_name = (file.name.match /^(\w+)/)[0]
-    file_name or= 'xxxxx'
-    console.log file_name
-    db.transaction (tx) -> saveIfNotExists(tx, file_name, textData)
-
-  reader.onerror = (ev) ->
-    alert 'error'
-
+    execSql tx, "INSERT INTO '" + name + "' (#{data[0]}) VALUES (#{quoted})"
 
 # select結果のtxとresを受け取り(自由変数のcolsのカラムの値を)、console.logに出力する
 selectToConsoleLog = (cols) ->
@@ -152,6 +86,72 @@ getColsOf = (tx, table_name, callback = (cols) -> console.log cols) ->
           (tx, res) ->
             cols = (res.rows.item(0).sql.match /\((.+)\)/)[1].split ','
             callback cols
+
+###
+# tabdb用関数
+###
+createTabdbTables = (tx) ->
+  console.log 'createTabdbTables start'
+  execSql tx, 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)'
+
+
+createDataTable = (tx, name, data) ->
+  console.log 'createDataTable'
+#    console.log (line.split ',' for line in data.split "\n")
+#   console.log data
+  lines = data.split "\n"
+#   console.log lines
+#   _insertDataTable = (tx, name, data = []) ->
+#     console.log '_insertDataTable start'
+#     insertData tx, name, data
+  execSql tx, createTableSql(name, lines[0].split ','), [],
+          (tx) -> insertDataTable tx, name, lines
+
+saveIfNotExists = (tx, name, data) ->
+  console.log 'saveIfNotExists start'
+#   console.log data
+#   _insertTabdbTables = (tx, name) ->
+#     console.log '_insertTabdbTables start'
+#     execSql tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]
+  execSql tx, 'SELECT name FROM tabdb_tables WHERE name = ?',
+          [name],
+          (tx, res) ->
+#             console.log res.rows
+            if res.rows.length > 0
+              console.log 'already exist table'
+            else
+              _insertTabdbTables tx, name
+#               console.log data
+              createDataTable tx, name, data
+          (tx, res) ->
+            createTabdbTables tx
+#             _insertTabdbTables tx, name
+            execSql tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]
+            createDataTable tx, name, data
+
+
+# file api
+selectFile = (ev) ->
+  file = ev.target.files[0]
+  alert file.name + ' is selected!'
+
+  reader = new FileReader()
+  reader.readAsText(file)
+
+  reader.onload = (ev) ->
+    console.log 'readeronload'
+    textData = reader.result
+    alert textData
+    console.log textData.split("\n")
+    file_name = (file.name.match /^(\w+)/)[0]
+    file_name or= 'xxxxx'
+    console.log file_name
+    db.transaction (tx) -> saveIfNotExists(tx, file_name, textData)
+
+  reader.onerror = (ev) ->
+    alert 'error'
+
+
 ###
 # event
 ###

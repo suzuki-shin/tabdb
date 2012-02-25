@@ -9,7 +9,7 @@
   db = window.openDatabase("tabdb", "", "TABDB", 1048576);
 
   /*
-  # functions
+  # 汎用関数
   */
 
   successLog = function(mes) {
@@ -30,51 +30,6 @@
     console.log(sql);
     console.log(params);
     return tx.executeSql(sql, params, success_callback, failure_callback);
-  };
-
-  createTabdbTables = function(tx) {
-    console.log('createTabdbTables start');
-    return execSql(tx, 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)');
-  };
-
-  createDataTable = function(tx, name, data) {
-    var lines, _insertDataTable;
-    console.log('createDataTable');
-    console.log(data);
-    lines = data.split("\n");
-    console.log(lines);
-    _insertDataTable = function(tx, name, data) {
-      if (data == null) data = [];
-      console.log('_insertDataTable start');
-      return insertData(tx, name, data);
-    };
-    return execSql(tx, createTableSql(name, lines[0].split(',')), [], function(tx) {
-      return _insertDataTable(tx, name, lines);
-    });
-  };
-
-  saveIfNotExists = function(tx, name, data) {
-    var _insertTabdbTables;
-    console.log('saveIfNotExists start');
-    console.log(data);
-    _insertTabdbTables = function(tx, name) {
-      console.log('_insertTabdbTables start');
-      return execSql(tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]);
-    };
-    return execSql(tx, 'SELECT name FROM tabdb_tables WHERE name = ?', [name], function(tx, res) {
-      console.log(res.rows);
-      if (res.rows.length > 0) {
-        return console.log('already exist table');
-      } else {
-        _insertTabdbTables(tx, name);
-        console.log(data);
-        return createDataTable(tx, name, data);
-      }
-    }, function(tx, res) {
-      createTabdbTables(tx);
-      _insertTabdbTables(tx, name);
-      return createDataTable(tx, name, data);
-    });
   };
 
   createTableSql = function(name, cols) {
@@ -111,33 +66,9 @@
         }
         return _results2;
       })();
-      _results.push(execSql(tx, "insert into '" + name + ("' (" + data[0] + ") values (" + quoted + ")")));
+      _results.push(execSql(tx, "INSERT INTO '" + name + ("' (" + data[0] + ") VALUES (" + quoted + ")")));
     }
     return _results;
-  };
-
-  selectFile = function(ev) {
-    var file, reader;
-    file = ev.target.files[0];
-    alert(file.name + ' is selected!');
-    reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = function(ev) {
-      var file_name, textData;
-      console.log('readeronload');
-      textData = reader.result;
-      alert(textData);
-      console.log(textData.split("\n"));
-      file_name = (file.name.match(/^(\w+)/))[0];
-      file_name || (file_name = 'xxxxx');
-      console.log(file_name);
-      return db.transaction(function(tx) {
-        return saveIfNotExists(tx, file_name, textData);
-      });
-    };
-    return reader.onerror = function(ev) {
-      return alert('error');
-    };
   };
 
   selectToConsoleLog = function(cols) {
@@ -204,6 +135,64 @@
       cols = (res.rows.item(0).sql.match(/\((.+)\)/))[1].split(',');
       return callback(cols);
     });
+  };
+
+  /*
+  # tabdb用関数
+  */
+
+  createTabdbTables = function(tx) {
+    console.log('createTabdbTables start');
+    return execSql(tx, 'CREATE TABLE IF NOT EXISTS tabdb_tables (name TEXT)');
+  };
+
+  createDataTable = function(tx, name, data) {
+    var lines;
+    console.log('createDataTable');
+    lines = data.split("\n");
+    return execSql(tx, createTableSql(name, lines[0].split(',')), [], function(tx) {
+      return insertDataTable(tx, name, lines);
+    });
+  };
+
+  saveIfNotExists = function(tx, name, data) {
+    console.log('saveIfNotExists start');
+    return execSql(tx, 'SELECT name FROM tabdb_tables WHERE name = ?', [name], function(tx, res) {
+      if (res.rows.length > 0) {
+        return console.log('already exist table');
+      } else {
+        _insertTabdbTables(tx, name);
+        return createDataTable(tx, name, data);
+      }
+    }, function(tx, res) {
+      createTabdbTables(tx);
+      execSql(tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]);
+      return createDataTable(tx, name, data);
+    });
+  };
+
+  selectFile = function(ev) {
+    var file, reader;
+    file = ev.target.files[0];
+    alert(file.name + ' is selected!');
+    reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function(ev) {
+      var file_name, textData;
+      console.log('readeronload');
+      textData = reader.result;
+      alert(textData);
+      console.log(textData.split("\n"));
+      file_name = (file.name.match(/^(\w+)/))[0];
+      file_name || (file_name = 'xxxxx');
+      console.log(file_name);
+      return db.transaction(function(tx) {
+        return saveIfNotExists(tx, file_name, textData);
+      });
+    };
+    return reader.onerror = function(ev) {
+      return alert('error');
+    };
   };
 
   /*
