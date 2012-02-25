@@ -4,7 +4,7 @@
   # config
   */
 
-  var createDataTable, createTabdbTables, createTableSql, db, execSelectAndLog, execSql, failureLog, insertData, saveIfNotExists, selectFile, selectTables, selectToConsoleLog, selectToTable, successLog, where_name_eq;
+  var createDataTable, createTabdbTables, createTableSql, db, execSelectAndLog, execSql, failureLog, getColsOf, insertData, saveIfNotExists, selectFile, selectTables, selectToConsoleLog, selectToTable, successLog, where_name_eq;
 
   where_name_eq = ' where name = ?';
 
@@ -203,6 +203,19 @@
     };
   };
 
+  getColsOf = function(tx, table_name, callback) {
+    if (callback == null) {
+      callback = function(cols) {
+        return console.log(cols);
+      };
+    }
+    return execSql(tx, "SELECT sql FROM sqlite_master WHERE name = ?", [table_name], function(tx, res) {
+      var cols;
+      cols = (res.rows.item(0).sql.match(/\((.+)\)/))[1].split(',');
+      return callback(cols);
+    });
+  };
+
   /*
   # event
   */
@@ -211,7 +224,10 @@
     $(document).on('change', '#selectFile', selectFile);
     return $('#test').click(function() {
       alert('hoge fuga');
-      return selectTables('hoge', ['id', 'name'], $('#test'), selectToTable);
+      selectTables('hoge', ['id', 'name'], $('#test'), selectToTable);
+      return db.transaction(function(tx) {
+        return getColsOf(tx, 'hoge');
+      });
     });
   });
 

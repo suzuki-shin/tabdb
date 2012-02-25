@@ -129,8 +129,15 @@ selectToTable = (cols, jqobj) ->
       jqobj.append '<tr><th>' + c + '</th><td>' + it[c] + '</td></tr>' for c in cols
     jqobj.append '</table>'
 
-
-
+# テーブルのカラムを取得する
+# tx
+# table_name : 対象テーブル名
+# callback   : colsを引数にとる1引数の関数。colsを使ってしたい実処理。
+getColsOf = (tx, table_name, callback = (cols) -> console.log cols) ->
+  execSql tx, "SELECT sql FROM sqlite_master WHERE name = ?", [table_name],
+          (tx, res) ->
+            cols = (res.rows.item(0).sql.match /\((.+)\)/)[1].split ','
+            callback cols
 ###
 # event
 ###
@@ -140,6 +147,7 @@ $ ->
   $('#test').click ->
     alert 'hoge fuga'
     selectTables 'hoge', ['id', 'name'],  $('#test'), selectToTable
+    db.transaction (tx) -> getColsOf tx, 'hoge'
 
 #     db.transaction (tx) -> createDataTable tx, 'DEF', "a,b,c\nAAAX,BXBB,1\nXUXX,YUYY,2\n"
 #         createTabdbTables()
