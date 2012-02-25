@@ -110,9 +110,9 @@ createDataTable = (tx, name, data) ->
 saveIfNotExists = (tx, name, data) ->
   console.log 'saveIfNotExists start'
 #   console.log data
-#   _insertTabdbTables = (tx, name) ->
-#     console.log '_insertTabdbTables start'
-#     execSql tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]
+  _insertTabdbTables = (tx, name) ->
+    console.log '_insertTabdbTables start'
+    execSql tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]
   execSql tx, 'SELECT name FROM tabdb_tables WHERE name = ?',
           [name],
           (tx, res) ->
@@ -125,8 +125,7 @@ saveIfNotExists = (tx, name, data) ->
               createDataTable tx, name, data
           (tx, res) ->
             createTabdbTables tx
-#             _insertTabdbTables tx, name
-            execSql tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]
+            _insertTabdbTables tx, name
             createDataTable tx, name, data
 
 

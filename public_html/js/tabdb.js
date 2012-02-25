@@ -156,7 +156,12 @@
   };
 
   saveIfNotExists = function(tx, name, data) {
+    var _insertTabdbTables;
     console.log('saveIfNotExists start');
+    _insertTabdbTables = function(tx, name) {
+      console.log('_insertTabdbTables start');
+      return execSql(tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]);
+    };
     return execSql(tx, 'SELECT name FROM tabdb_tables WHERE name = ?', [name], function(tx, res) {
       if (res.rows.length > 0) {
         return console.log('already exist table');
@@ -166,7 +171,7 @@
       }
     }, function(tx, res) {
       createTabdbTables(tx);
-      execSql(tx, 'INSERT INTO tabdb_tables (name) VALUES (?)', [name]);
+      _insertTabdbTables(tx, name);
       return createDataTable(tx, name, data);
     });
   };
